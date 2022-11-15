@@ -1,5 +1,13 @@
 import random
 
+
+def score(motifs):
+    score = 0
+    for i in range(len(motifs[0])):
+        motif = ''.join(motifs[j][i] for j in range(len(motifs)))
+        score += min([HammingDistance(motif,homogenous*len(motif)) for homogenous in 'ACGT'])
+    return score
+
 def HammingDistance(seq1, seq2):
     if len(seq1) != len(seq2):
         raise ValueError('Undefined for sequences of unequal length.')
@@ -18,9 +26,35 @@ def profile(motifs):
         col = ''.join([motifs[j][i] for j in range(len(motifs))])
         prof.append([float(col.count(nuc))/float(len(col)) for nuc in 'ACGT'])
     return prof
-def find_most_probable_kmer_in_line(line):
+def find_most_probable_kmer_in_line(line, k, prof):
     score = 0.0
-
+    index = 0
+    kmerScore=1.0
+    for x in range (500-k):
+        curKmer=line[x:x+10]
+        for y in range(10):
+            kmerIndex=curKmer[y]
+            print("KMER INDEX IS :"+kmerIndex+" ITS enumerateion is ="+(kmerIndex in enumerate('ACGT')))
+            kmerScore=kmerScore*prof[y][kmerIndex in enumerate('ACGT')]
+        print(kmerScore)
+        if(kmerScore>score):
+            index=x
+    return line[x:x+10]
+def profile_most_probable_kmer(dna, k, prof):
+    dna = dna.splitlines()
+    nuc_loc = {nucleotide:index for index,nucleotide in enumerate('ACGT')}
+    motif_matrix = []
+    max_prob = [-1, None]
+    for i in range(len(dna)):
+        motif_matrix.append(max_prob)
+    for i in range(len(dna)):
+        for chunk in window(dna[i],K):
+            current_prob = 1
+            for j, nuc in enumerate(chunk):
+                current_prob*=prof[j][nuc_loc[nuc]]
+            if current_prob>motif_matrix[i][0]:
+                motif_matrix[i] = [current_prob,chunk]
+    return list(list(zip(*motif_matrix))[1])
 
 def profile_most_probable_kmer(dna, k, prof):
     newMotifs= []
@@ -44,12 +78,15 @@ for line in Lines:
     motif_List.append(line[motifStart:(motifStart+k)])
     print(line)
     # select random motifs from lines
+profileArr=profile(motif_List)
+print(profileArr);
 
+for line in Lines:
+    print("MOST PROBAB KMER IN LINE" + find_most_probable_kmer_in_line(line, k,profileArr));
 print("motif list is :",motif_List)
 
 #calculate profile from motifs
-profileArr=profile(motif_List)
-print(profileArr);
+
 
 
 
