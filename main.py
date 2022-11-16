@@ -37,34 +37,22 @@ def find_most_probable_kmer_in_line(line, k, prof):
             kmerIndex=curKmer[y]
             nuc = nucName.find(kmerIndex)
             #print(type(kmerIndex))
-            print("KMER INDEX IS :",kmerIndex," ITS enumerateion is =" , nuc)
-            print("ZEYN ZEYN ZEYN",prof[y][nuc])
+            #print("KMER INDEX IS :",kmerIndex," ITS enumerateion is =" , nuc)
+            #print("ZEYN ZEYN ZEYN",prof[y][nuc])
             kmerScore=kmerScore*prof[y][nuc]
-        print(kmerScore)
+        #print(kmerScore)
         if(kmerScore>score):
             index=x
-    return line[x:x+10]
-def profile_most_probable_kmer(dna, k, prof):
-    dna = dna.splitlines()
-    nuc_loc = {nucleotide:index for index,nucleotide in enumerate('ACGT')}
-    motif_matrix = []
-    max_prob = [-1, None]
-    for i in range(len(dna)):
-        motif_matrix.append(max_prob)
-    for i in range(len(dna)):
-        for chunk in window(dna[i],K):
-            current_prob = 1
-            for j, nuc in enumerate(chunk):
-                current_prob*=prof[j][nuc_loc[nuc]]
-            if current_prob>motif_matrix[i][0]:
-                motif_matrix[i] = [current_prob,chunk]
-    return list(list(zip(*motif_matrix))[1])
+    return (index,score);
 
-def iterate_randomized_search(dna,k,prof):
+def iterate_randomized_search(dna,k,prof,motif_list):
     new_motif_List = []
     for i in range(len(dna)):
         newLine=dna[i]
-        most_probab_kmer= find_most_probable_kmer_in_line(newLine, k, prof)
+        most_probab_kmer_stats= find_most_probable_kmer_in_line(newLine, k, prof)
+        if(most_probab_kmer_stats[1]==0):
+            most_probab_kmer=motif_list[i]
+        if(most_probab_kmer_stats[0]!=0 && most_probab_kmer_stats[])
         #print("MOST PROBAB KMER IN LINE :" +most_probab_kmer );
         new_motif_List.append(most_probab_kmer);
     print("NEW MOTIFS====", new_motif_List, "NEW SCORE===", score(new_motif_List))
@@ -89,17 +77,20 @@ for line in Lines:
     motif_List.append(line[motifStart:(motifStart+k)])
     print(line)
     # select random motifs from lines
-profileArr=profile(motif_List)
-iterate_randomized_search(Lines, k, profileArr)
+#profileArr=profile(motif_List)
+
+profileArr = profile(motif_List)
+for iter in range(10):
+    print("PROFİLE aRRaY İS ", profileArr)
+    new_motifffs=iterate_randomized_search(Lines, k, profileArr)
+    motif_List=new_motifffs
+    print("OLD MOTIFS===", profileArr, "OLD SCORE====", score(motif_List))
+    prof=profile(new_motifffs)
+    profileArr=prof
+    #print("NEW MOTIFS====", prof, "NEW SCORE===", score(new_motifffs))
+    print("IS PROF CHaNGING???", prof[0])
 print(profileArr)
-new_motif_List = []
-for i in range(len(profileArr)):
-    newLine=Lines[i]
-    print("MOST PROBAB KMER IN LINE :" + find_most_probable_kmer_in_line(newLine, k,profileArr));
-    new_motif_List.append(find_most_probable_kmer_in_line(newLine , k, profileArr));
-#print("motif list is :",motif_List)
-print("OLD MOTIFS===", motif_List ,"OLD SCORE====",score(motif_List))
-print("NEW MOTIFS====", new_motif_List, "NEW SCORE===", score(new_motif_List))
+
 
 #calculate profile from motifs
 
