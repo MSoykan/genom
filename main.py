@@ -26,8 +26,18 @@ def profile(motifs):
         col = ''.join([motifs[j][i] for j in range(len(motifs))])
         prof.append([float(col.count(nuc))/float(len(col)) for nuc in 'ACGT'])
     return prof
+
+def calculate_kmer_probability(prof, kmer):
+    nucName="ACGT"
+    kmerScore=1.0
+    for x in range(len(kmer)):
+        kmerIndex=kmer[x]
+        nuc = nucName.find(kmerIndex)
+        kmerScore=kmerScore*prof[x][nuc]
+    return kmerScore
+
 def find_most_probable_kmer_in_line(line, k, prof):
-    score = -1.0
+    score = 0.0000000001
     index = 0
     nucName = "ACGT"
     kmerScore=1.0
@@ -51,17 +61,17 @@ def iterate_randomized_search(dna,k,prof,motif_list):
     for i in range(len(dna)):
         newLine=dna[i]
         most_probab_kmer_stats= find_most_probable_kmer_in_line(newLine, k, prof)
-        if(most_probab_kmer_stats[1]>score(motif_list[i])):
+        if(most_probab_kmer_stats[1]>calculate_kmer_probability(prof, motif_list[i])):
             startIndex=most_probab_kmer_stats[0]
             motif_list[i]=newLine[startIndex:startIndex+k]
         #print("MOST PROBAB KMER IN LINE :" +most_probab_kmer );
     print("NEW MOTIFS====", motif_list, "NEW SCORE===", score(motif_list))
-
+    return motif_List
 
 # Using readlines() to read from txt dna file.-> returns an array which has every line as element
 file1 = open('dna.txt', 'r')
 Lines = file1.readlines()
-k = 10
+k = 9
 
 count = 0
 # Strips the newline character
@@ -79,10 +89,11 @@ for line in Lines:
 #profileArr=profile(motif_List)
 
 profileArr = profile(motif_List)
-print("OLD MOTIF LIST :", motif_List)
+print("OLD MOTIF LIST :", motif_List, "AND OLD SCORE", score(motif_List))
+
 for iter in range(10):
-    print("PROFİLE aRRaY İS ", profileArr)
-    iterate_randomized_search(Lines, k, profileArr, motif_List)
+    print("PROFILE ARRAY IS ", profileArr)
+    motif_List=iterate_randomized_search(Lines, k, profileArr, motif_List)
     profileArr = profile(motif_List)
     #print("NEW MOTIFS====", prof, "NEW SCORE===", score(new_motifffs))
 print(profileArr)
