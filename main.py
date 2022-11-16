@@ -27,13 +27,13 @@ def profile(motifs):
         prof.append([float(col.count(nuc))/float(len(col)) for nuc in 'ACGT'])
     return prof
 def find_most_probable_kmer_in_line(line, k, prof):
-    score = 0.0
+    score = -1.0
     index = 0
     nucName = "ACGT"
     kmerScore=1.0
     for x in range (500-k):
         curKmer=line[x:x+10]
-        for y in range(10):
+        for y in range(k):
             kmerIndex=curKmer[y]
             nuc = nucName.find(kmerIndex)
             #print(type(kmerIndex))
@@ -43,20 +43,19 @@ def find_most_probable_kmer_in_line(line, k, prof):
         #print(kmerScore)
         if(kmerScore>score):
             index=x
+            score=kmerScore
+        kmerScore=1.0
     return (index,score);
 
 def iterate_randomized_search(dna,k,prof,motif_list):
-    new_motif_List = []
     for i in range(len(dna)):
         newLine=dna[i]
         most_probab_kmer_stats= find_most_probable_kmer_in_line(newLine, k, prof)
-        if(most_probab_kmer_stats[1]==0):
-            most_probab_kmer=motif_list[i]
-        if(most_probab_kmer_stats[0]!=0 && most_probab_kmer_stats[])
+        if(most_probab_kmer_stats[1]>score(motif_list[i])):
+            startIndex=most_probab_kmer_stats[0]
+            motif_list[i]=newLine[startIndex:startIndex+k]
         #print("MOST PROBAB KMER IN LINE :" +most_probab_kmer );
-        new_motif_List.append(most_probab_kmer);
-    print("NEW MOTIFS====", new_motif_List, "NEW SCORE===", score(new_motif_List))
-    return new_motif_List
+    print("NEW MOTIFS====", motif_list, "NEW SCORE===", score(motif_list))
 
 
 # Using readlines() to read from txt dna file.-> returns an array which has every line as element
@@ -80,15 +79,12 @@ for line in Lines:
 #profileArr=profile(motif_List)
 
 profileArr = profile(motif_List)
+print("OLD MOTIF LIST :", motif_List)
 for iter in range(10):
     print("PROFİLE aRRaY İS ", profileArr)
-    new_motifffs=iterate_randomized_search(Lines, k, profileArr)
-    motif_List=new_motifffs
-    print("OLD MOTIFS===", profileArr, "OLD SCORE====", score(motif_List))
-    prof=profile(new_motifffs)
-    profileArr=prof
+    iterate_randomized_search(Lines, k, profileArr, motif_List)
+    profileArr = profile(motif_List)
     #print("NEW MOTIFS====", prof, "NEW SCORE===", score(new_motifffs))
-    print("IS PROF CHaNGING???", prof[0])
 print(profileArr)
 
 
