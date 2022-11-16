@@ -29,13 +29,17 @@ def profile(motifs):
 def find_most_probable_kmer_in_line(line, k, prof):
     score = 0.0
     index = 0
+    nucName = "ACGT"
     kmerScore=1.0
     for x in range (500-k):
         curKmer=line[x:x+10]
         for y in range(10):
             kmerIndex=curKmer[y]
-            print("KMER INDEX IS :"+kmerIndex+" ITS enumerateion is ="+(kmerIndex in enumerate('ACGT')))
-            kmerScore=kmerScore*prof[y][kmerIndex in enumerate('ACGT')]
+            nuc = nucName.find(kmerIndex)
+            #print(type(kmerIndex))
+            print("KMER INDEX IS :",kmerIndex," ITS enumerateion is =" , nuc)
+            print("ZEYN ZEYN ZEYN",prof[y][nuc])
+            kmerScore=kmerScore*prof[y][nuc]
         print(kmerScore)
         if(kmerScore>score):
             index=x
@@ -56,8 +60,15 @@ def profile_most_probable_kmer(dna, k, prof):
                 motif_matrix[i] = [current_prob,chunk]
     return list(list(zip(*motif_matrix))[1])
 
-def profile_most_probable_kmer(dna, k, prof):
-    newMotifs= []
+def iterate_randomized_search(dna,k,prof):
+    new_motif_List = []
+    for i in range(len(dna)):
+        newLine=dna[i]
+        most_probab_kmer= find_most_probable_kmer_in_line(newLine, k, prof)
+        #print("MOST PROBAB KMER IN LINE :" +most_probab_kmer );
+        new_motif_List.append(most_probab_kmer);
+    print("NEW MOTIFS====", new_motif_List, "NEW SCORE===", score(new_motif_List))
+    return new_motif_List
 
 
 # Using readlines() to read from txt dna file.-> returns an array which has every line as element
@@ -79,11 +90,16 @@ for line in Lines:
     print(line)
     # select random motifs from lines
 profileArr=profile(motif_List)
-print(profileArr);
-
-for line in Lines:
-    print("MOST PROBAB KMER IN LINE" + find_most_probable_kmer_in_line(line, k,profileArr));
-print("motif list is :",motif_List)
+iterate_randomized_search(Lines, k, profileArr)
+print(profileArr)
+new_motif_List = []
+for i in range(len(profileArr)):
+    newLine=Lines[i]
+    print("MOST PROBAB KMER IN LINE :" + find_most_probable_kmer_in_line(newLine, k,profileArr));
+    new_motif_List.append(find_most_probable_kmer_in_line(newLine , k, profileArr));
+#print("motif list is :",motif_List)
+print("OLD MOTIFS===", motif_List ,"OLD SCORE====",score(motif_List))
+print("NEW MOTIFS====", new_motif_List, "NEW SCORE===", score(new_motif_List))
 
 #calculate profile from motifs
 
