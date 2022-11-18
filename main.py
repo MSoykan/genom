@@ -1,3 +1,4 @@
+import math
 import random
 
 
@@ -27,51 +28,69 @@ def profile(motifs):
         prof.append([float(col.count(nuc))/float(len(col)) for nuc in 'ACGT'])
     return prof
 
-def calculate_kmer_probability(prof, kmer):
+def calculate_kmer_probability(prof, kmer, k):
     nucName="ACGT"
     kmerScore=1.0
-    for x in range(len(kmer)):
+    for x in range(k):
         kmerIndex=kmer[x]
         nuc = nucName.find(kmerIndex)
-        kmerScore=kmerScore*prof[x][nuc]
+        if(math.isclose(prof[x][nuc],0.0)):
+            kmerScore=0.0
+            break
+        else:
+            kmerScore=kmerScore*prof[x][nuc]
     return kmerScore
 
 def find_most_probable_kmer_in_line(line, k, prof):
-    score = 0.0000000001
+    float_score = 0.0
     index = 0
     nucName = "ACGT"
     kmerScore=1.0
+    same_probab_kmers= []
     for x in range (500-k):
         curKmer=line[x:x+10]
         for y in range(k):
             kmerIndex=curKmer[y]
             nuc = nucName.find(kmerIndex)
-            #print(type(kmerIndex))
-            #print("KMER INDEX IS :",kmerIndex," ITS enumerateion is =" , nuc)
-            #print("ZEYN ZEYN ZEYN",prof[y][nuc])
-            kmerScore=kmerScore*prof[y][nuc]
-        #print(kmerScore)
-        if(kmerScore>score):
+            if(math.isclose(prof[y][nuc],0.0)):
+                kmerScore=0.0
+                break
+            else:
+                kmerScore=kmerScore*prof[y][nuc]
+        if(not math.isclose(kmerScore, 0.0) and kmerScore>float_score):
             index=x
-            score=kmerScore
+            float_score=kmerScore
+        elif(math.isclose(kmerScore,float_score)):
+            if(len(same_probab_kmers) != 0 and kmerScore>calculate_kmer_probability(prof, same_probab_kmers[0][0],k)):
+                same_probab_kmers.clear();
+                same_probab_kmers.append((curKmer ,x));
+            else:
+                same_probab_kmers.append((curKmer, x));
         kmerScore=1.0
-    return (index,score);
+        #print("SAME PROBABS ===" ,same_probab_kmers,)
+    if(len(same_probab_kmers) != 0 and math.isclose(float_score,calculate_kmer_probability(prof, same_probab_kmers[0][0], k))):
+        rnd = random.randint(0, len(same_probab_kmers)-1)
+        return(same_probab_kmers[rnd][1], float_score)
+    else:
+        return (index,float_score);
 
 def iterate_randomized_search(dna,k,prof,motif_list):
+
     for i in range(len(dna)):
         newLine=dna[i]
         most_probab_kmer_stats= find_most_probable_kmer_in_line(newLine, k, prof)
-        if(most_probab_kmer_stats[1]>calculate_kmer_probability(prof, motif_list[i])):
+        if(not math.isclose(most_probab_kmer_stats[1],0.0) and most_probab_kmer_stats[1]>calculate_kmer_probability(prof, motif_list[i],k)):
             startIndex=most_probab_kmer_stats[0]
             motif_list[i]=newLine[startIndex:startIndex+k]
         #print("MOST PROBAB KMER IN LINE :" +most_probab_kmer );
+    #if(score(motif_list)<)
     print("NEW MOTIFS====", motif_list, "NEW SCORE===", score(motif_list))
     return motif_List
 
 # Using readlines() to read from txt dna file.-> returns an array which has every line as element
 file1 = open('dna.txt', 'r')
 Lines = file1.readlines()
-k = 9
+k = 10
 
 count = 0
 # Strips the newline character
@@ -95,7 +114,6 @@ for iter in range(10):
     print("PROFILE ARRAY IS ", profileArr)
     motif_List=iterate_randomized_search(Lines, k, profileArr, motif_List)
     profileArr = profile(motif_List)
-    #print("NEW MOTIFS====", prof, "NEW SCORE===", score(new_motifffs))
 print(profileArr)
 
 
