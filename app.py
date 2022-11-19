@@ -1,1 +1,0 @@
-print("soykan soykan soykan")
